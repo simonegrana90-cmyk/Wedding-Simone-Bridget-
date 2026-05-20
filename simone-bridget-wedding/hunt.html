@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Golden Lemon Hunt 🍋</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0d1f33;
+  --gold: #C5A028;
+  --gold-light: #F0D060;
+  --cream: #F5F0E8;
+  --forest: #1a3020;
+  --ruby: #7B1A2A;
+  --bg: #080f08;
+  --card-bg: rgba(20,35,20,0.9);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--cream);
+  font-family: 'Jost', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* PARTICLE BACKGROUND */
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  font-size: 14px;
+  animation: drift linear infinite;
+  opacity: 0;
+}
+@keyframes drift {
+  0% { opacity: 0; transform: translateY(100vh) rotate(0deg); }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.4; }
+  100% { opacity: 0; transform: translateY(-10vh) rotate(360deg); }
+}
+
+/* ── SCREENS ── */
+.screen { display: none; position: relative; z-index: 1; }
+.screen.active { display: block; }
+
+/* ── INTRO SCREEN ── */
+#screen-intro {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+#screen-intro.active { display: flex; }
+
+.hunt-logo {
+  font-size: 64px;
+  animation: pulse 2s ease-in-out infinite;
+  margin-bottom: 8px;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.hunt-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(42px, 8vw, 80px);
+  font-weight: 300;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.hunt-title em { font-style: italic; color: var(--gold); }
+.hunt-sub {
+  font-size: 12px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.5);
+  margin-bottom: 32px;
+}
+.hunt-desc {
+  max-width: 500px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: rgba(245,240,232,0.7);
+  font-weight: 300;
+  margin-bottom: 48px;
+}
+.gold-rule { width: 60px; height: 1px; background: var(--gold); margin: 24px auto; }
+
+/* PATH CHOOSE */
+.path-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto 32px;
+}
+.path-card {
+  border: 1px solid rgba(197,160,40,0.3);
+  padding: 40px 24px;
+  cursor: pointer;
+  transition: all 0.4s;
+  background: var(--card-bg);
+  position: relative;
+  overflow: hidden;
+}
+.path-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.path-card.simone-card::before { background: radial-gradient(ellipse at center, rgba(197,160,40,0.15) 0%, transparent 70%); }
+.path-card.bridget-card::before { background: radial-gradient(ellipse at center, rgba(123,26,42,0.2) 0%, transparent 70%); }
+.path-card:hover::before { opacity: 1; }
+.path-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-4px);
+}
+.path-emoji { font-size: 40px; margin-bottom: 16px; }
+.path-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.path-card p {
+  font-size: 13px;
+  color: rgba(245,240,232,0.6);
+  line-height: 1.6;
+}
+.path-or {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: rgba(245,240,232,0.3);
+  text-align: center;
+  margin: 8px 0;
+  position: relative;
+}
+
+/* ── QUIZ SCREEN ── */
+#screen-quiz { padding: 40px 24px; max-width: 720px; margin: 0 auto; }
+#screen-quiz.active { display: block; }
+
+.quiz-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.quiz-path-badge {
+  display: inline-block;
+  background: var(--gold);
+  color: #000;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  margin-bottom: 16px;
+}
+.quiz-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 300;
+}
+.quiz-title em { font-style: italic; color: var(--gold); }
+
+/* PROGRESS */
+.progress-bar {
+  width: 100%;
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  margin-bottom: 40px;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.5s ease;
+}
+.progress-text {
+  text-align: right;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: rgba(245,240,232,0.4);
+  margin-bottom: 8px;
+}
+.score-display {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  margin-bottom: 32px;
+}
+
+/* QUESTION */
+.question-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(197,160,40,0.2);
+  padding: 40px;
+  margin-bottom: 24px;
+  animation: slideIn 0.4s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.q-number {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.q-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.q-hint {
+  font-size: 12px;
+  color: rgba(245,240,232,0.4);
+  font-style: italic;
+  margin-bottom: 24px;
+}
+.q-clue {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(197,160,40,0.4);
+  border-top: 1px solid rgba(197,160,40,0.1);
+  padding-top: 12px;
+  margin-top: 16px;
+}
+
+/* OPTIONS */
+.options-grid {
+  display: grid;
+  gap: 12px;
+}
+.option-btn {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--cream);
+  padding: 16px 20px;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  transition: all 0.25s;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.option-btn:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(197,160,40,0.08);
+}
+.option-btn.correct {
+  border-color: #4CAF50;
+  background: rgba(76,175,80,0.15);
+  color: #81C784;
+}
+.option-btn.wrong {
+  border-color: #f44336;
+  background: rgba(244,67,54,0.1);
+  color: rgba(244,67,54,0.8);
+}
+.option-label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--gold);
+  min-width: 20px;
+}
+.feedback-msg {
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-style: italic;
+  margin: 16px 0;
+  min-height: 28px;
+  color: var(--gold-light);
+}
+.clue-reveal {
+  text-align: center;
+  background: rgba(197,160,40,0.1);
+  border: 1px solid var(--gold);
+  padding: 12px 20px;
+  margin: 12px 0;
+  display: none;
+  animation: fadeIn 0.5s ease;
+}
+.clue-reveal.show { display: block; }
+.clue-symbol {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+.clue-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.btn-next {
+  width: 100%;
+  background: var(--gold);
+  color: #000;
+  border: none;
+  padding: 16px;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 16px;
+  display: none;
+}
+.btn-next.show { display: block; }
+.btn-next:hover { background: var(--gold-light); }
+
+/* ── HUNT SCREEN ── */
+#screen-hunt { padding: 40px 24px; max-width: 800px; margin: 0 auto; }
+#screen-hunt.active { display: block; }
+
+.hunt-intro-box {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.hunt-intro-box h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 42px;
+  font-weight: 300;
+  margin-bottom: 12px;
+}
+.hunt-intro-box h2 em { color: var(--gold); font-style: italic; }
+.hunt-intro-box p {
+  font-size: 14px;
+  color: rgba(245,240,232,0.6);
+  line-height: 1.8;
+  max-width: 500px;
+  margin: 0 auto;
+  font-weight: 300;
+}
+.collected-clues {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+.clue-chip {
+  background: rgba(197,160,40,0.15);
+  border: 1px solid rgba(197,160,40,0.4);
+  padding: 8px 16px;
+  font-size: 20px;
+  border-radius: 2px;
+  animation: popIn 0.3s ease;
+}
+.clue-chip.hidden-chip {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.1);
+  font-size: 14px;
+  color: rgba(245,240,232,0.3);
+  letter-spacing: 2px;
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* HUNT GRID */
+.hunt-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.hunt-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(197,160,40,0.15);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+.hunt-card.found {
+  border-color: var(--gold);
+  background: rgba(197,160,40,0.08);
+}
+.hunt-card:not(.found):hover {
+  border-color: rgba(197,160,40,0.5);
+  transform: translateY(-2px);
+}
+.hunt-card-icon { font-size: 32px; margin-bottom: 12px; }
+.hunt-card h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  color: var(--gold);
+  font-weight: 300;
+  margin-bottom: 8px;
+}
+.hunt-card p {
+  font-size: 12px;
+  color: rgba(245,240,232,0.5);
+  line-height: 1.5;
+}
+.found-badge {
+  position: absolute;
+  top: 8px; right: 8px;
+  font-size: 16px;
+}
+.hunt-clue-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.hunt-clue-overlay.open { display: flex; }
+.hunt-clue-box {
+  background: var(--card-bg);
+  border: 1px solid var(--gold);
+  padding: 48px;
+  max-width: 520px;
+  text-align: center;
+  animation: popIn 0.3s ease;
+}
+.hunt-clue-box .big-symbol { font-size: 60px; margin-bottom: 16px; }
+.hunt-clue-box h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.hunt-clue-box p {
+  font-size: 14px;
+  color: rgba(245,240,232,0.7);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.clue-code {
+  background: rgba(197,160,40,0.15);
+  border: 1px solid var(--gold);
+  padding: 12px 24px;
+  font-size: 22px;
+  letter-spacing: 6px;
+  color: var(--gold);
+  margin: 16px 0;
+  font-family: monospace;
+}
+.btn-close-clue {
+  background: none;
+  border: 1px solid rgba(245,240,232,0.3);
+  color: var(--cream);
+  padding: 10px 28px;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 16px;
+  transition: all 0.3s;
+}
+.btn-close-clue:hover { border-color: var(--gold); color: var(--gold); }
+.btn-enter-vault {
+  width: 100%;
+  background: var(--gold);
+  color: #000;
+  border: none;
+  padding: 18px;
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  transition: all 0.3s;
+  margin-top: 24px;
+}
+.btn-enter-vault:hover { background: var(--gold-light); }
+
+/* ── VAULT SCREEN ── */
+#screen-vault { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; }
+#screen-vault.active { display: flex; }
+.vault-lock { font-size: 80px; margin-bottom: 16px; animation: shake 0.5s ease; }
+@keyframes shake {
+  0%,100% { transform: rotate(0); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+.vault-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 300;
+  margin-bottom: 12px;
+}
+.vault-title em { color: var(--gold); font-style: italic; }
+.vault-desc {
+  font-size: 14px;
+  color: rgba(245,240,232,0.6);
+  margin-bottom: 32px;
+  max-width: 480px;
+  line-height: 1.8;
+}
+.vault-input-wrap {
+  display: flex;
+  gap: 0;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto 16px;
+}
+.vault-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(197,160,40,0.4);
+  border-right: none;
+  color: var(--cream);
+  padding: 16px 20px;
+  font-family: 'Jost', sans-serif;
+  font-size: 15px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  outline: none;
+}
+.vault-input:focus { border-color: var(--gold); }
+.btn-vault-submit {
+  background: var(--gold);
+  color: #000;
+  border: none;
+  padding: 0 28px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.3s;
+}
+.btn-vault-submit:hover { background: var(--gold-light); }
+.vault-clue-display {
+  margin: 24px 0;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.vault-clue-piece {
+  background: rgba(197,160,40,0.1);
+  border: 1px solid rgba(197,160,40,0.3);
+  padding: 10px 16px;
+  font-size: 22px;
+}
+.vault-error { color: #f44336; font-size: 13px; margin-top: 8px; min-height: 20px; }
+.vault-hint-btn {
+  background: none;
+  border: none;
+  color: rgba(245,240,232,0.3);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: color 0.3s;
+  font-family: 'Jost', sans-serif;
+}
+.vault-hint-btn:hover { color: var(--gold); }
+.vault-hint-text {
+  display: none;
+  font-size: 13px;
+  color: rgba(197,160,40,0.7);
+  font-style: italic;
+  margin-top: 8px;
+  max-width: 440px;
+}
+
+/* ── WINNER SCREEN ── */
+#screen-winner { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; background: radial-gradient(ellipse at center, rgba(197,160,40,0.15) 0%, transparent 60%); }
+#screen-winner.active { display: flex; }
+.winner-trophy { font-size: 100px; animation: bounce 1s ease infinite; }
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+.winner-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(40px, 8vw, 80px);
+  font-weight: 300;
+  color: var(--gold);
+  margin: 16px 0 8px;
+}
+.winner-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-style: italic;
+  color: rgba(245,240,232,0.8);
+  margin-bottom: 24px;
+}
+.winner-score {
+  font-size: 48px;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.winner-desc {
+  font-size: 15px;
+  color: rgba(245,240,232,0.7);
+  max-width: 500px;
+  line-height: 1.8;
+  margin-bottom: 32px;
+}
+.winner-reward {
+  background: var(--card-bg);
+  border: 1px solid var(--gold);
+  padding: 32px 40px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.winner-reward h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.winner-reward p {
+  font-size: 14px;
+  color: rgba(245,240,232,0.8);
+  line-height: 1.7;
+}
+.confetti-burst { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
+
+@keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .path-grid { grid-template-columns: 1fr; }
+  .hunt-grid { grid-template-columns: 1fr 1fr; }
+  .question-card { padding: 24px; }
+  .hunt-clue-box { padding: 32px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SCREEN 1: INTRO & PATH CHOICE        -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen active" id="screen-intro">
+  <div class="hunt-logo">🍋</div>
+  <h1 class="hunt-title">The <em>Golden<br>Lemon</em> Hunt</h1>
+  <p class="hunt-sub">Simone & Bridget · 1 agosto 2026</p>
+  <div class="gold-rule"></div>
+  <p class="hunt-desc">
+    Pensi di conoscerli davvero? Questa non è una normale quiz. 
+    È una caccia ai segreti della coppia più strana dei Caraibi — 
+    con indizi nascosti, un vault finale, e un solo vincitore.
+    <br><br>
+    <em>Think you know them? Prove it.</em>
+  </p>
+
+  <p style="font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:20px;">Scegli il tuo percorso · Choose your path</p>
+
+  <div class="path-grid">
+    <div class="path-card simone-card" onclick="choosePath('simone')">
+      <div class="path-emoji">🍸</div>
+      <h3>Team Simone</h3>
+      <p>Conosci il lato caotico, creativo e notturno del barman italiano. Sai cosa beve alle 2 di notte?</p>
+      <br>
+      <small style="color:var(--gold);font-size:10px;letter-spacing:2px;">I KNOW SIMONE BETTER →</small>
+    </div>
+    <div class="path-card bridget-card" onclick="choosePath('bridget')">
+      <div class="path-emoji">🌹</div>
+      <h3>Team Bridget</h3>
+      <p>Conosci il lato elegante, osservatore e letalmente ironico di BK. Sai cosa la fa impazzire?</p>
+      <br>
+      <small style="color:var(--gold);font-size:10px;letter-spacing:2px;">I KNOW BRIDGET BETTER →</small>
+    </div>
+  </div>
+
+  <p style="font-size:11px;color:rgba(245,240,232,0.3);margin-top:16px;">
+    🍋 Raccoglierai indizi nascosti durante il quiz. Usali nel Vault finale.
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SCREEN 2: QUIZ                        -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="screen-quiz">
+  <div style="max-width:720px;margin:0 auto;padding:80px 24px 40px;">
+    <div class="quiz-header">
+      <div class="quiz-path-badge" id="pathBadge">PATH</div>
+      <h2 class="quiz-title" id="quizTitle">Loading...</h2>
+    </div>
+    <div class="progress-text" id="progressText">Question 1 of 7</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="score-display" id="scoreDisplay">Score: 0 pts</div>
+
+    <div class="question-card" id="questionCard">
+      <div class="q-number" id="qNumber">Q1</div>
+      <div class="q-text" id="qText">Loading...</div>
+      <div class="q-hint" id="qHint"></div>
+      <div class="options-grid" id="optionsGrid"></div>
+      <div class="feedback-msg" id="feedbackMsg"></div>
+      <div class="clue-reveal" id="clueReveal">
+        <div class="clue-symbol" id="clueSymbol"></div>
+        <div class="clue-label">🔐 Clue collected!</div>
+        <div style="font-size:11px;color:rgba(197,160,40,0.6);margin-top:4px;" id="clueDesc"></div>
+      </div>
+      <div class="q-clue" id="qClue"></div>
+    </div>
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">Next →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SCREEN 3: TREASURE HUNT              -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="screen-hunt">
+  <div style="padding:80px 24px 40px; max-width:800px; margin:0 auto;">
+    <div class="hunt-intro-box">
+      <h2>Part II: <em>The Hunt</em></h2>
+      <p>Il quiz è finito. Ma la vera sfida inizia ora.<br>
+      Hai raccolto indizi durante il quiz — adesso devi trovare quelli nascosti qui sotto.<br>
+      Ogni card nasconde un simbolo. Trovali tutti per aprire il Vault.</p>
+
+      <div class="gold-rule"></div>
+
+      <p style="font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;">Indizi raccolti · Collected clues</p>
+      <div class="collected-clues" id="collectedClues"></div>
+
+      <div style="margin-top:16px;">
+        <span style="font-size:28px;" id="huntScoreDisplay">⭐ Score: <span id="huntScore">0</span> pts</span>
+      </div>
+    </div>
+
+    <div class="hunt-grid" id="huntGrid">
+      <!-- Populated by JS -->
+    </div>
+
+    <div style="text-align:center">
+      <button class="btn-enter-vault" onclick="goToVault()">
+        🔐 Enter the Vault
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Hunt Clue Overlay -->
+<div class="hunt-clue-overlay" id="huntClueOverlay">
+  <div class="hunt-clue-box">
+    <div class="big-symbol" id="overlaySymbol"></div>
+    <h3 id="overlayTitle"></h3>
+    <p id="overlayDesc"></p>
+    <div class="clue-code" id="overlayCode"></div>
+    <p style="font-size:11px;color:rgba(245,240,232,0.4);margin-top:8px;" id="overlayHint"></p>
+    <button class="btn-close-clue" onclick="closeHuntOverlay()">✓ Got it — save this clue</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SCREEN 4: THE VAULT                   -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="screen-vault">
+  <div class="vault-lock" id="vaultLock">🔒</div>
+  <h2 class="vault-title">You made it further<br>than <em>most.</em></h2>
+  <p class="vault-desc">
+    Hai completato il quiz e trovato gli indizi nascosti.<br>
+    Ma un'ultima serratura rimane.<br><br>
+    Combina i simboli che hai raccolto per formare la frase segreta.<br>
+    <em>One winner. One vault. One golden lemon.</em>
+  </p>
+
+  <div class="vault-clue-display" id="vaultClueDisplay">
+    <!-- shows collected clues -->
+  </div>
+
+  <div class="vault-input-wrap">
+    <input class="vault-input" id="vaultInput" type="text" placeholder="INSERISCI IL CODICE · ENTER THE CODE" maxlength="40">
+    <button class="btn-vault-submit" onclick="checkVault()">→</button>
+  </div>
+  <div class="vault-error" id="vaultError"></div>
+
+  <button class="vault-hint-btn" onclick="showVaultHint()">Need a hint?</button>
+  <div class="vault-hint-text" id="vaultHintText">
+    I simboli che hai raccolto formano una parola. In italiano. È qualcosa che Simone ama più di qualsiasi altra cosa al mondo (e non è Bridget, purtroppo per lei).
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SCREEN 5: WINNER                      -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="screen-winner">
+  <div class="confetti-burst" id="confetti"></div>
+  <div class="winner-trophy">🏆</div>
+  <h2 class="winner-title">KEEPER OF THE LORE</h2>
+  <p class="winner-sub">You unlocked the Golden Lemon Vault.</p>
+  <div class="winner-score" id="finalScore">—</div>
+  <p class="winner-desc" id="winnerDesc">
+    Hai dimostrato una conoscenza enciclopedica della coppia più strana dei Caraibi.
+    Questo merita un riconoscimento ufficiale al matrimonio.
+  </p>
+  <div class="winner-reward">
+    <h3>🍋 Il tuo premio</h3>
+    <p id="winnerReward">
+      Sei ufficialmente il/la <strong>Keeper of the Lore</strong> del matrimonio.<br>
+      Mostra questo schermo a Simone o Bridget la sera del matrimonio 
+      per riscuotere il tuo premio speciale. 🥂<br><br>
+      <em>Screenshot this screen. You'll need it.</em>
+    </p>
+  </div>
+  <br>
+  <a href="index.html" style="color:rgba(245,240,232,0.4);font-size:11px;letter-spacing:2px;text-decoration:none;">← Back to wedding website</a>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const state = {
+  path: null,
+  currentQ: 0,
+  score: 0,
+  quizClues: [],
+  huntClues: [],
+  startTime: null,
+  answered: false
+};
+
+const VAULT_CODES = ['maionese', 'mayo', 'mayonnaise', 'thevow', 'il voto', 'limone', 'lemon', 'goldenmaionese'];
+
+// ═══════════════════════════════════════════
+// QUESTIONS
+// ═══════════════════════════════════════════
+const QUESTIONS_SIMONE = [
+  {
+    text: "Simone lavora in un bar. È il suo compleanno. Una signora inglese si avvicina. Cosa fa Simone?",
+    hint: "Novembre 2023. Una serata qualunque... o forse no.",
+    options: [
+      { text: "Le sorride e aspetta che parli", correct: false },
+      { text: "Cerca di risponderle in inglese con quello che sa", correct: true },
+      { text: "Finge di non averla vista", correct: false },
+      { text: "Chiama un collega che parla inglese", correct: false }
+    ],
+    feedback_right: "Esatto! Simone non si tira indietro — anche con un inglese traballante. 🍸",
+    feedback_wrong: "No no no. Simone non si arrende mai. Nemmeno davanti a una lingua straniera.",
+    clue: { symbol: "🍋", desc: "Prima lettera: M" }
+  },
+  {
+    text: "È mezzanotte. Simone è sveglio. Qual è la probabilità che stia cercando qualcosa su internet?",
+    hint: "Pensaci bene. Conosci la sua mente notturna?",
+    options: [
+      { text: "10% — dorme presto", correct: false },
+      { text: "50% — dipende dalla settimana", correct: false },
+      { text: "95% — è quasi certo", correct: true },
+      { text: "Solo se c'è un'emergenza", correct: false }
+    ],
+    feedback_right: "Correttissimo. Simone di notte ha idee, ricerche e progetti. È un fatto della vita. 🌙",
+    feedback_wrong: "Hmm. Chi ha risposto questo non conosce le notti di Simone.",
+    clue: null
+  },
+  {
+    text: "Qual è la salsa commerciale preferita di Simone — quella che difenderebbe in un dibattito filosofico?",
+    hint: "Hint: c'è una foto sul sito del matrimonio. Una foto leggendaria.",
+    options: [
+      { text: "Ketchup Heinz", correct: false },
+      { text: "Maionese Hellmann's", correct: true },
+      { text: "Salsa BBQ", correct: false },
+      { text: "Sriracha", correct: false }
+    ],
+    feedback_right: "🥄 LA MAIONESE. Simone la tratta come un'arte. Quella foto con il barattolo XXL è reale.",
+    feedback_wrong: "Sbagliato. Simone ha comprato un barattolo industriale di maionese. Capito ora?",
+    clue: { symbol: "🥄", desc: "Seconda lettera: A" }
+  },
+  {
+    text: "Il film preferito di Simone è 'The Vow' (La Memoria del Cuore). La sua attrice preferita è Rachel McAdams. Cosa dice questo di lui?",
+    hint: "Un ingegnere elettronico che beve cocktail e piange ai film romantici.",
+    options: [
+      { text: "È un romantico sotto la superficie caotica", correct: true },
+      { text: "Sceglie film a caso", correct: false },
+      { text: "Gli piacciono i film drammatici in generale", correct: false },
+      { text: "È stata Bridget a scegliere il film", correct: false }
+    ],
+    feedback_right: "Perfetto. Simone è un romantico. The Vow, Rachel McAdams, maionese. Non giudicatelo.",
+    feedback_wrong: "Hmm. C'è più profondità in quell'uomo di quanto sembra.",
+    clue: null
+  },
+  {
+    text: "Simone ha fatto la proposta esattamente 2 anni dopo il primo incontro. Nello stesso posto. Questo dice che Simone è...",
+    options: [
+      { text: "Nostalgico e romantico", correct: false },
+      { text: "Uno che pianifica in silenzio per anni", correct: false },
+      { text: "Entrambe le cose — romantico e pianificatore segreto", correct: true },
+      { text: "Una coincidenza fortunata", correct: false }
+    ],
+    feedback_right: "Esatto. Quella data non è un caso. Ha aspettato 2 anni per fare la cosa giusta, nel posto giusto. 💍",
+    feedback_wrong: "Non era un caso! L'8 novembre 2025 era pianificato.",
+    clue: { symbol: "🌙", desc: "Terza lettera: I" }
+  },
+  {
+    text: "Simone viene dall'Italia, vive alle Cayman, parla italiano e inglese (ora). Cosa succede quando incontra qualcuno che non parla nessuna delle due?",
+    hint: "Pensa alle sue origini italiane e al suo spirito di adattamento.",
+    options: [
+      { text: "Improvvisa con le mani", correct: true },
+      { text: "Si arrende subito", correct: false },
+      { text: "Chiama un traduttore", correct: false },
+      { text: "Parla più forte sperando che capiscano", correct: false }
+    ],
+    feedback_right: "Gli italiani comunicano con le mani. È un superpotere universale. 🤌",
+    feedback_wrong: "Hai mai visto un italiano quando non riesce a comunicare? Le mani parlano da sole.",
+    clue: null
+  },
+  {
+    text: "Simone conosce Bridget l'8 novembre. La propone l'8 novembre di 2 anni dopo. I suoi genitori si chiamano come quelli del Relais dove si sposa. Cosa direbbe Simone di tutto questo?",
+    hint: "Pensa alla filosofia di vita di un barman italiano notturno.",
+    options: [
+      { text: "«Pura coincidenza»", correct: false },
+      { text: "«L'universo ha un piano»", correct: false },
+      { text: "«Ho scelto io ogni cosa, anche quando sembrava caso»", correct: true },
+      { text: "«Chiedi a Bridget, lei sa tutto»", correct: false }
+    ],
+    feedback_right: "Simone è uno che crea le sue coincidenze. Anche se poi finge che siano magiche. 🎩",
+    feedback_wrong: "Conosci Simone meglio. Non lascia le cose al caso.",
+    clue: { symbol: "🍸", desc: "Quarta lettera: O" }
+  }
+];
+
+const QUESTIONS_BRIDGET = [
+  {
+    text: "Bridget vede qualcuno che non ha usato la parola giusta nella email sbagliata al momento sbagliato. Qual è la sua prima reazione?",
+    hint: "Pensa a quella energia da project manager con un documento di 20 pagine.",
+    options: [
+      { text: "Lo ignora e va avanti", correct: false },
+      { text: "Lo corregge internamente senza dirlo", correct: false },
+      { text: "Crea immediatamente un documento action plan", correct: true },
+      { text: "Ne parla con Simone quella sera", correct: false }
+    ],
+    feedback_right: "Esatto! Bridget non vede il caos — lo converte in un documento strutturato con owner e deadline. 📋",
+    feedback_wrong: "Chi conosce Bridget sa che c'è sempre un documento pronto.",
+    clue: { symbol: "🌹", desc: "Prima lettera: M" }
+  },
+  {
+    text: "Bridget ha una figlia che si chiama Sierra. Durante una serata in famiglia, Sierra ruuba l'ultimo sorso dal bicchiere di Bridget. Bridget...",
+    hint: "Pensa alle foto sul sito. Quelle espressioni dicono tutto.",
+    options: [
+      { text: "Si arrabbia ma finge di no", correct: false },
+      { text: "Lo lascia fare ridendo", correct: true },
+      { text: "Riempie immediatamente un altro bicchiere", correct: false },
+      { text: "Fa una foto per i social", correct: false }
+    ],
+    feedback_right: "Bridget e Sierra hanno quel tipo di rapporto. Chaos accettato, amore totale. 💕",
+    feedback_wrong: "Hai visto quelle foto di loro due? Non c'è rancore in quella famiglia.",
+    clue: null
+  },
+  {
+    text: "Cosa indossa Bridget quando NON deve impressionare nessuno, è a casa e vuole stare comoda?",
+    hint: "Guarda attentamente le foto di casa.",
+    options: [
+      { text: "Un pigiama di seta", correct: false },
+      { text: "Qualcosa di assurdo ma coordinato", correct: true },
+      { text: "I vestiti del giorno prima", correct: false },
+      { text: "Solo il necessario", correct: false }
+    ],
+    feedback_right: "Bridget ha un rapporto speciale con i costumi. La banana, la tuta rossa da agente, il casco LED… comfort e stile non si escludono.",
+    feedback_wrong: "Hai visto il costume da banana? Bridget ha sempre un look, anche a casa.",
+    clue: { symbol: "🍌", desc: "Seconda lettera: A" }
+  },
+  {
+    text: "È la mattina del giorno dopo una serata importante. Bridget si sveglia. Cosa fa per prima cosa?",
+    hint: "Pensa a quel livello di organizzazione.",
+    options: [
+      { text: "Controlla le notifiche del telefono", correct: false },
+      { text: "Beve caffè in silenzio totale", correct: false },
+      { text: "Inizia già a processare mentalmente la prossima cosa da fare", correct: true },
+      { text: "Aspetta che Simone si svegli", correct: false }
+    ],
+    feedback_right: "Bridget non si spegne. La mente continua anche dormendo. È un feature, non un bug.",
+    feedback_wrong: "Conosci quel documento di 20 pagine che ha scritto per il matrimonio? Ecco.",
+    clue: null
+  },
+  {
+    text: "Qual è la parola che descrive meglio l'energia di Bridget durante un evento che non sta andando come pianificato?",
+    options: [
+      { text: "Panico", correct: false },
+      { text: "Frustrazione visibile", correct: false },
+      { text: "Controlled chaos manager", correct: true },
+      { text: "Totale calma zen", correct: false }
+    ],
+    feedback_right: "Esatto. Bridget non va nel panico — va in modalità GESTIONE. Il caos è il suo elemento naturale. 💪",
+    feedback_wrong: "Bridget non si spaventa. Si adatta. È la differenza.",
+    clue: { symbol: "👑", desc: "Terza lettera: I" }
+  },
+  {
+    text: "Bridget entra in un ristorante. Il servizio è lento, l'acqua non è stata portata e il tavolo non è apparecchiato. Cosa fa?",
+    hint: "Lei viene dal mondo del bar service. Sa come gira.",
+    options: [
+      { text: "Si lamenta ad alta voce", correct: false },
+      { text: "Nota tutto, dice poco, lascia la mancia proporzionale", correct: true },
+      { text: "Chiede il manager", correct: false },
+      { text: "Non ci fa caso", correct: false }
+    ],
+    feedback_right: "Bridget conosce il mestiere dall'interno. Giudica con competenza, non con arroganza. 🍷",
+    feedback_wrong: "Bridget sa cosa vuol dire servire. Non è il tipo che fa scenate.",
+    clue: null
+  },
+  {
+    text: "Il 9 novembre 2025, il giorno dopo la proposta di matrimonio, Bridget...",
+    hint: "Pensa a cosa farebbe una donna con il suo livello organizzativo il giorno dopo il più grande sì della sua vita.",
+    options: [
+      { text: "Chiama tutti gli amici", correct: false },
+      { text: "Dorme tutto il giorno", correct: false },
+      { text: "Ha già una lista mentale di 47 cose da fare", correct: true },
+      { text: "Festeggia senza pensare a nient'altro", correct: false }
+    ],
+    feedback_right: "E quella lista è diventata un documento di 20 pagine con tabelle, owner, e deadline. Abbiamo letto il piano. 📄✨",
+    feedback_wrong: "Hint: guarda il documento del piano del matrimonio che ha scritto.",
+    clue: { symbol: "💍", desc: "Quarta lettera: O" }
+  }
+];
+
+// ═══════════════════════════════════════════
+// HUNT CARDS
+// ═══════════════════════════════════════════
+const HUNT_CARDS = [
+  {
+    icon: "🍸",
+    title: "The Cocktail Archive",
+    desc: "Ogni barman ha un cocktail segreto. Trova quello di Simone.",
+    clue: { symbol: "🍸", letter: "N", code: "VGX-1", hint: "Lettera 5: N" },
+    riddle: "Simone inventa un cocktail alle 2 di notte. Ingrediente segreto: maionese + limone + qualcosa di inaspettato. Come lo chiamerebbe?",
+    answer_hint: "The Vault accetta: MAIONESE"
+  },
+  {
+    icon: "🌴",
+    title: "Cayman Secrets",
+    desc: "Due stranieri su un'isola. Un bar. Un inizio impossibile.",
+    clue: { symbol: "🌴", letter: "E", code: "KYD-2", hint: "Lettera 6: E" },
+    riddle: "Il loro primo appuntamento era al rooftop PomPom. Vista sui Caraibi. Cosa hanno ordinato, secondo te?",
+    answer_hint: "Cocktail. Sempre cocktail."
+  },
+  {
+    icon: "💍",
+    title: "The November 8 Vault",
+    desc: "Una data che si ripete. Un posto che si ricorda.",
+    clue: { symbol: "💍", letter: "S", code: "NOV-8", hint: "Lettera 7: S" },
+    riddle: "Stesso giorno, stesso posto, 2 anni dopo. La proposta. Quante volte deve succedere una cosa perché diventi destino?",
+    answer_hint: "Una volta è abbastanza, se è quella giusta."
+  },
+  {
+    icon: "🥄",
+    title: "The Mayo Manifesto",
+    desc: "Un uomo. Un barattolo. Una scelta di vita irrevocabile.",
+    clue: { symbol: "🥄", letter: "E", code: "HLM-5", hint: "Lettera 8: E" },
+    riddle: "Simone ha comprato un barattolo industriale di Hellmann's. Era un regalo o uso personale?",
+    answer_hint: "La risposta è ovvia."
+  },
+  {
+    icon: "🎬",
+    title: "The Vow / La Memoria",
+    desc: "Il film. L'attrice. Il romantico che si nasconde.",
+    clue: { symbol: "🎬", letter: "→", code: "VAULTKEY", hint: "Codice vault: MAIONESE" },
+    riddle: "The Vow (La Memoria del Cuore). Rachel McAdams. Un barman italiano che piange ai film romantici. Questo ti dice tutto ciò che devi sapere.",
+    answer_hint: "Il codice del vault è la salsa preferita di Simone."
+  },
+  {
+    icon: "🌙",
+    title: "The Night Researcher",
+    desc: "Mentre dormi, lui cerca. Cosa trova?",
+    clue: { symbol: "🌙", letter: "★", code: "BONUS+50", hint: "Bonus: +50 punti" },
+    riddle: "Alle 2 di notte, Simone apre il browser. Cosa sta cercando?",
+    answer_hint: "Probabilmente qualcosa di molto specifico e assolutamente inutile alle 2 di notte."
+  }
+];
+
+// ═══════════════════════════════════════════
+// PARTICLES
+// ═══════════════════════════════════════════
+function createParticles() {
+  const container = document.getElementById('particles');
+  const symbols = ['🍋','✨','🌿','🍸','💍','🌙','⭐','🥂'];
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.fontSize = (10 + Math.random() * 16) + 'px';
+    container.appendChild(p);
+  }
+}
+createParticles();
+
+// ═══════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ═══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════
+// PATH CHOICE
+// ═══════════════════════════════════════════
+function choosePath(path) {
+  state.path = path;
+  state.currentQ = 0;
+  state.score = 0;
+  state.quizClues = [];
+  state.startTime = Date.now();
+  const questions = path === 'simone' ? QUESTIONS_SIMONE : QUESTIONS_BRIDGET;
+  document.getElementById('pathBadge').textContent = path === 'simone' ? '🍸 Team Simone' : '🌹 Team Bridget';
+  document.getElementById('quizTitle').innerHTML = path === 'simone'
+    ? 'The <em>Simone</em> Files'
+    : 'The <em>Bridget</em> Chronicles';
+  showScreen('quiz');
+  renderQuestion(questions[0], 0, questions.length);
+}
+
+// ═══════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════
+function renderQuestion(q, idx, total) {
+  state.answered = false;
+  document.getElementById('qNumber').textContent = 'Q' + (idx + 1);
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('qHint').textContent = q.hint || '';
+  document.getElementById('feedbackMsg').textContent = '';
+  document.getElementById('progressText').textContent = `Question ${idx + 1} of ${total}`;
+  document.getElementById('progressFill').style.width = ((idx / total) * 100) + '%';
+  document.getElementById('scoreDisplay').textContent = '⭐ Score: ' + state.score + ' pts';
+
+  const cr = document.getElementById('clueReveal');
+  cr.classList.remove('show');
+  document.getElementById('btnNext').classList.remove('show');
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-label">${labels[i]}</span>${opt.text}`;
+    btn.onclick = () => answerQuestion(opt, q, btn, grid.querySelectorAll('.option-btn'));
+    grid.appendChild(btn);
+  });
+}
+
+function answerQuestion(opt, q, clickedBtn, allBtns) {
+  if (state.answered) return;
+  state.answered = true;
+  allBtns.forEach(b => b.disabled = true);
+  const correct = opt.correct;
+
+  allBtns.forEach(b => {
+    const label = b.querySelector('.option-label').textContent;
+    const idx = ['A','B','C','D'].indexOf(label);
+    if (q.options[idx] && q.options[idx].correct) b.classList.add('correct');
+  });
+  if (!correct) clickedBtn.classList.add('wrong');
+
+  const pts = correct ? 100 : 0;
+  state.score += pts;
+  document.getElementById('scoreDisplay').textContent = '⭐ Score: ' + state.score + ' pts';
+  document.getElementById('feedbackMsg').textContent = correct
+    ? (q.feedback_right || '✓ Corretto!')
+    : (q.feedback_wrong || '✗ Sbagliato.');
+
+  if (q.clue && correct) {
+    state.quizClues.push(q.clue);
+    document.getElementById('clueSymbol').textContent = q.clue.symbol;
+    document.getElementById('clueDesc').textContent = q.clue.desc;
+    document.getElementById('clueReveal').classList.add('show');
+  }
+
+  document.getElementById('btnNext').classList.add('show');
+}
+
+function nextQuestion() {
+  const questions = state.path === 'simone' ? QUESTIONS_SIMONE : QUESTIONS_BRIDGET;
+  state.currentQ++;
+  if (state.currentQ >= questions.length) {
+    goToHunt();
+  } else {
+    renderQuestion(questions[state.currentQ], state.currentQ, questions.length);
+  }
+}
+
+// ═══════════════════════════════════════════
+// HUNT
+// ═══════════════════════════════════════════
+function goToHunt() {
+  showScreen('hunt');
+  renderCollectedClues();
+  document.getElementById('huntScore').textContent = state.score;
+  renderHuntGrid();
+}
+
+function renderCollectedClues() {
+  const el = document.getElementById('collectedClues');
+  el.innerHTML = '';
+  const total = 5;
+  for (let i = 0; i < total; i++) {
+    const chip = document.createElement('div');
+    if (i < state.quizClues.length) {
+      chip.className = 'clue-chip';
+      chip.textContent = state.quizClues[i].symbol;
+      chip.title = state.quizClues[i].desc;
+    } else {
+      chip.className = 'clue-chip hidden-chip';
+      chip.textContent = '? ? ?';
+    }
+    el.appendChild(chip);
+  }
+}
+
+function renderHuntGrid() {
+  const grid = document.getElementById('huntGrid');
+  grid.innerHTML = '';
+  HUNT_CARDS.forEach((card, i) => {
+    const div = document.createElement('div');
+    div.className = 'hunt-card';
+    div.dataset.idx = i;
+    div.innerHTML = `
+      <div class="hunt-card-icon">${card.icon}</div>
+      <h4>${card.title}</h4>
+      <p>${card.desc}</p>
+    `;
+    div.onclick = () => openHuntCard(i);
+    grid.appendChild(div);
+  });
+}
+
+function openHuntCard(idx) {
+  const card = HUNT_CARDS[idx];
+  document.getElementById('overlaySymbol').textContent = card.clue.symbol;
+  document.getElementById('overlayTitle').textContent = card.title;
+  document.getElementById('overlayDesc').textContent = card.riddle;
+  document.getElementById('overlayCode').textContent = card.clue.code;
+  document.getElementById('overlayHint').textContent = '🔐 ' + card.answer_hint;
+
+  const overlay = document.getElementById('huntClueOverlay');
+  overlay.classList.add('open');
+  overlay.dataset.idx = idx;
+
+  // Mark as found
+  if (!state.huntClues.includes(idx)) {
+    state.huntClues.push(idx);
+    if (card.clue.code === 'BONUS+50') state.score += 50;
+    else state.score += 30;
+    document.getElementById('huntScore').textContent = state.score;
+  }
+}
+
+function closeHuntOverlay() {
+  const overlay = document.getElementById('huntClueOverlay');
+  const idx = parseInt(overlay.dataset.idx);
+  overlay.classList.remove('open');
+  // Mark card as found visually
+  const card = document.querySelector(`.hunt-card[data-idx="${idx}"]`);
+  if (card) {
+    card.classList.add('found');
+    if (!card.querySelector('.found-badge')) {
+      const badge = document.createElement('div');
+      badge.className = 'found-badge';
+      badge.textContent = '✓';
+      card.appendChild(badge);
+    }
+  }
+  renderCollectedClues();
+}
+
+function goToVault() {
+  showScreen('vault');
+  const display = document.getElementById('vaultClueDisplay');
+  display.innerHTML = '';
+  [...state.quizClues, ...HUNT_CARDS.filter((_, i) => state.huntClues.includes(i)).map(c => ({symbol: c.clue.symbol}))].forEach(clue => {
+    const piece = document.createElement('div');
+    piece.className = 'vault-clue-piece';
+    piece.textContent = clue.symbol;
+    display.appendChild(piece);
+  });
+}
+
+// ═══════════════════════════════════════════
+// VAULT
+// ═══════════════════════════════════════════
+function checkVault() {
+  const input = document.getElementById('vaultInput').value.toLowerCase().trim();
+  const errorEl = document.getElementById('vaultError');
+
+  if (VAULT_CODES.includes(input)) {
+    state.score += 500;
+    showWinner();
+  } else {
+    errorEl.textContent = '✗ Codice errato. Rileggi gli indizi. · Wrong code. Re-read the clues.';
+    document.getElementById('vaultLock').style.animation = 'none';
+    setTimeout(() => {
+      document.getElementById('vaultLock').style.animation = '';
+      errorEl.textContent = '';
+    }, 800);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const vi = document.getElementById('vaultInput');
+  if (vi) {
+    vi.addEventListener('keydown', e => {
+      if (e.key === 'Enter') checkVault();
+    });
+  }
+});
+
+function showVaultHint() {
+  document.getElementById('vaultHintText').style.display = 'block';
+}
+
+// ═══════════════════════════════════════════
+// WINNER
+// ═══════════════════════════════════════════
+function showWinner() {
+  const elapsed = Math.round((Date.now() - state.startTime) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const pathLabel = state.path === 'simone' ? 'Team Simone' : 'Team Bridget';
+
+  document.getElementById('finalScore').textContent = '⭐ ' + state.score + ' pts';
+  document.getElementById('winnerDesc').innerHTML = `
+    Path: <strong>${pathLabel}</strong> · Time: <strong>${mins}m ${secs}s</strong><br><br>
+    Hai dimostrato una conoscenza enciclopedica della coppia più strana dei Caraibi.
+    Questo merita un riconoscimento ufficiale al matrimonio. 🏆
+  `;
+
+  showScreen('winner');
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const container = document.getElementById('confetti');
+  const symbols = ['🍋','⭐','🥂','🎊','💛','✨','🏆'];
+  for (let i = 0; i < 40; i++) {
+    const el = document.createElement('div');
+    el.style.position = 'absolute';
+    el.style.left = Math.random() * 100 + '%';
+    el.style.top = '-50px';
+    el.style.fontSize = (16 + Math.random() * 20) + 'px';
+    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    el.style.animation = `drift ${3 + Math.random() * 4}s linear forwards`;
+    el.style.animationDelay = (Math.random() * 2) + 's';
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 7000);
+  }
+}
+
+// Check for secret entry from main site
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('secret') === 'goldenstart' || urlParams.get('secret') === 'mayo_master') {
+  document.querySelector('.hunt-desc').innerHTML += '<br><br><span style="color:var(--gold);font-size:12px;letter-spacing:2px;">🍋 SECRET ENTRY DETECTED — +100 bonus points await you</span>';
+  state.score += 100;
+}
+</script>
+</body>
+</html>
