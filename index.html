@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simone & Bridget — 1 Agosto 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B3A5C;
+    --forest: #2D4A35;
+    --gold: #C5A028;
+    --gold-light: #E8C84A;
+    --cream: #F5F0E8;
+    --cream-dark: #EDE5D5;
+    --white: #FDFAF5;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    overflow-x: hidden;
+  }
+
+  /* ===== SPLASH =====
+     SEMPRE affiancato (sinistra/destra) su qualsiasi schermo.
+     UNA sola foto condivisa, posizionata per mostrare i visi/mani al centro.
+     La linea verticale divide le due metà.
+  ===== */
+  #splash {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: row; /* SEMPRE affiancato, mai colonna */
+  }
+
+  /* Contenitore foto condivisa — sta sotto entrambe le metà */
+  .splash-photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: #8BA5B8; /* colore di fallback se la foto non copre */
+  }
+
+  .splash-photo img {
+    width: 115%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 28%;
+    display: block;
+    margin-left: -130px;
+  }
+
+  .splash-half {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  .splash-overlay {
+    position: absolute;
+    inset: 0;
+    transition: background 0.4s;
+    pointer-events: none;
+  }
+
+  .splash-left  .splash-overlay { background: rgba(27,58,92,0.52); }
+  .splash-right .splash-overlay { background: rgba(45,74,53,0.52); }
+
+  .splash-half:active .splash-overlay { background: rgba(0,0,0,0.18) !important; }
+
+  @media (hover: hover) {
+    .splash-half:hover .splash-overlay { background: rgba(0,0,0,0.18); }
+  }
+
+  .splash-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: var(--cream);
+    padding: clamp(1rem, 4vw, 2rem) clamp(0.8rem, 3vw, 1.5rem);
+    pointer-events: none;
+  }
+
+  .splash-flag { font-size: clamp(1.8rem, 5vw, 2.8rem); margin-bottom: 0.4rem; }
+
+  .splash-name {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.4rem, 4.5vw, 3rem);
+    letter-spacing: 0.12em;
+    margin-bottom: 0.3rem;
+  }
+
+  .splash-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(0.85rem, 2.5vw, 1.35rem);
+    opacity: 0.9;
+    margin-bottom: clamp(0.8rem, 2vw, 1.5rem);
+  }
+
+  .splash-btn {
+    display: inline-block;
+    border: 1.5px solid var(--gold);
+    color: var(--gold-light);
+    padding: 0.5rem clamp(1rem, 3vw, 1.8rem);
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+    letter-spacing: 0.2em;
+    transition: all 0.3s;
+    background: transparent;
+    pointer-events: auto;
+  }
+
+  /* Divisore verticale — SEMPRE verticale */
+  .splash-divider {
+    position: absolute;
+    top: 8%; bottom: 8%; left: 50%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.6), transparent);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .splash-heart {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 11;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    color: var(--gold);
+    filter: drop-shadow(0 0 8px rgba(197,160,40,0.9));
+    pointer-events: none;
+    animation: heartbeat 2s ease-in-out infinite;
+  }
+
+  @keyframes heartbeat {
+    0%, 100% { transform: translate(-50%,-50%) scale(1); }
+    50%       { transform: translate(-50%,-50%) scale(1.2); }
+  }
+
+  #splash.fade-out { animation: splashFade 0.8s ease forwards; }
+
+  @keyframes splashFade { to { opacity: 0; pointer-events: none; } }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.4s, backdrop-filter 0.4s;
+  }
+
+  nav.scrolled {
+    background: rgba(27,58,92,0.95);
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    color: var(--cream);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--cream);
+    text-decoration: none;
+    opacity: 0.85;
+    transition: opacity 0.2s, color 0.2s;
+  }
+
+  .nav-links a:hover { opacity: 1; color: var(--gold-light); }
+
+  .nav-lang { display: none; } /* IT/EN rimosso dalla nav — la lingua si sceglie solo nella splash */
+
+  /* ===== HERO ===== */
+  #hero {
+    height: 200vh;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-slides { position: absolute; inset: 0; }
+
+  .hero-slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+    transform: scale(1.05);
+    animation: slowZoom 8s ease-in-out infinite alternate;
+  }
+
+  .hero-slide.active { opacity: 1; }
+
+  @keyframes slowZoom {
+    from { transform: scale(1.05); }
+    to { transform: scale(1.12); }
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(27,58,92,0.3) 0%, rgba(27,58,92,0.6) 100%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: var(--cream);
+    padding: 2rem;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--gold-light);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.5s ease forwards;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.8s ease forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .hero-date {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    letter-spacing: 0.25em;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.1s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Countdown */
+  #countdown {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 1s 1.4s ease forwards;
+  }
+
+  .countdown-item {
+    text-align: center;
+  }
+
+  .countdown-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--gold-light);
+  }
+
+  .countdown-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    opacity: 0.7;
+    margin-top: 0.3rem;
+  }
+
+  .countdown-sep {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    color: var(--gold);
+    opacity: 0.5;
+    align-self: center;
+    padding-bottom: 1.2rem;
+  }
+
+  /* ===== SECTIONS ===== */
+  section { padding: 6rem 2rem; }
+
+  .section-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 0.8rem;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    text-align: center;
+    color: var(--navy);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .section-title em { font-style: italic; color: var(--forest); }
+
+  .section-line {
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+    margin: 0 auto 3rem;
+  }
+
+  /* ===== SEZIONE DESTINO ===== */
+  .destiny-wrap {
+    max-width: 820px;
+    margin: 5rem auto 0;
+    text-align: center;
+    padding: 0 1rem;
+  }
+
+  .destiny-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    color: var(--forest);
+    margin-bottom: 1.8rem;
+    letter-spacing: 0.02em;
+  }
+
+  .destiny-photo-wrap {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .destiny-photo-wrap img {
+    width: 100%;
+    display: block;
+    border: 1px solid var(--gold);
+    box-shadow: 0 8px 40px rgba(27,58,92,0.12);
+  }
+
+  .destiny-names {
+    margin-top: 0.8rem;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.6rem, 1.8vw, 0.75rem);
+    letter-spacing: 0.25em;
+    color: var(--gold);
+  }
+
+  /* ===== STORIA ===== */
+  #storia { background: var(--white); }
+
+  .heart-photo {
+    width: min(380px, 90%);
+    aspect-ratio: 1;
+    margin: 0 auto 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .heart-photo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('https://i.ibb.co/k2xsHtsF/PXL-20260518-235516988.jpg');
+    background-size: cover;
+    background-position: center;
+    clip-path: polygon(50% 0%, 100% 35%, 100% 70%, 50% 100%, 0% 70%, 0% 35%);
+    /* heart via SVG mask */
+  }
+
+  /* Heart via SVG */
+  .heart-img-wrap {
+    width: min(340px, 85%);
+    margin: 0 auto 3rem;
+  }
+
+  .heart-svg-mask {
+    width: 100%;
+    display: block;
+  }
+
+  .timeline {
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+    transform: translateX(-50%);
+  }
+
+  .tl-item {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    align-items: flex-start;
+  }
+
+  .tl-item:nth-child(odd) { flex-direction: row-reverse; }
+
+  .tl-content {
+    flex: 1;
+    background: var(--cream);
+    padding: 1.5rem;
+    border-radius: 2px;
+    border-left: 3px solid var(--gold);
+    box-shadow: 0 4px 20px rgba(27,58,92,0.08);
+  }
+
+  .tl-item:nth-child(odd) .tl-content { border-left: none; border-right: 3px solid var(--gold); }
+
+  .tl-date {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+
+  .tl-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--navy);
+  }
+
+  .tl-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 0 4px var(--cream);
+  }
+
+  .tl-spacer { flex: 1; }
+
+  /* ===== PHOTO GRID ===== */
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .photo-grid img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.4s ease, filter 0.4s ease;
+    filter: brightness(0.95);
+  }
+
+  .photo-grid img:hover { transform: scale(1.03); filter: brightness(1.05); }
+
+  /* ===== QUOTE BAND ===== */
+  .quote-band {
+    position: relative;
+    padding: 8rem 2rem;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .quote-band-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll; /* scroll default: iOS non supporta fixed su elementi non-body */
+    filter: brightness(0.35);
+  }
+  @media (hover: hover) and (min-width: 769px) {
+    .quote-band-bg { background-attachment: fixed; } /* parallasse solo su desktop */
+  }
+
+  .quote-text {
+    position: relative;
+    z-index: 1;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    color: var(--cream);
+    max-width: 800px;
+    margin: 0 auto 1rem;
+    line-height: 1.4;
+  }
+
+  .quote-author {
+    position: relative;
+    z-index: 1;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--gold-light);
+  }
+
+  /* ===== GALLERY ===== */
+  #gallery { background: var(--navy); }
+
+  #gallery .section-title { color: var(--cream); }
+  #gallery .section-eyebrow { color: var(--gold-light); }
+  #gallery .section-line { background: var(--gold-light); }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 768px) {
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav-links { display: none; }
+  }
+
+  .gallery-item {
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .gallery-item::after {
+    content: '✦';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--gold-light);
+    background: rgba(27,58,92,0.6);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .gallery-item:hover::after { opacity: 1; }
+
+  .gallery-item img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .gallery-item:hover img { transform: scale(1.08); }
+
+  /* ===== LIGHTBOX ===== */
+  #lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,15,25,0.97);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  #lightbox.open { display: flex; }
+
+  #lightbox img {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border: 1px solid rgba(197,160,40,0.2);
+  }
+
+  .lb-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    color: var(--cream);
+    font-size: 2rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'Cormorant Garamond', serif;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .lb-close:hover { opacity: 1; }
+
+  .lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--gold-light);
+    font-size: 2.5rem;
+    cursor: pointer;
+    padding: 1rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .lb-nav:hover { opacity: 1; }
+  .lb-prev { left: 1rem; }
+  .lb-next { right: 1rem; }
+
+  /* ===== PROGRAMMA ===== */
+  #programma { background: var(--cream-dark); }
+
+  .programma-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 3rem;
+    border: 1px solid var(--gold);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .prog-tab {
+    padding: 0.7rem 2rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--navy);
+    transition: all 0.3s;
+  }
+
+  .prog-tab.active {
+    background: var(--gold);
+    color: var(--white);
+  }
+
+  .prog-day { display: none; max-width: 700px; margin: 0 auto; }
+  .prog-day.active { display: block; }
+
+  .prog-day-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .prog-event {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    align-items: flex-start;
+  }
+
+  .prog-time {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    white-space: nowrap;
+    min-width: 80px;
+    font-weight: 600;
+  }
+
+  .prog-desc h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    color: var(--navy);
+    margin-bottom: 0.3rem;
+  }
+
+  .prog-desc p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  /* ===== LOCATION ===== */
+  #location { background: var(--white); }
+
+  .location-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+    align-items: center;
+  }
+
+  @media (max-width: 600px) {
+    .location-grid { grid-template-columns: 1fr; }
+  }
+
+  .location-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    filter: brightness(0.92);
+  }
+
+  .location-info h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .location-info p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--navy);
+    margin-bottom: 1.2rem;
+  }
+
+  .location-btn {
+    display: inline-block;
+    background: var(--navy);
+    color: var(--cream);
+    padding: 0.7rem 1.8rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-decoration: none;
+    transition: background 0.3s;
+  }
+
+  .location-btn:hover { background: var(--gold); }
+
+  /* ===== DRESS CODE ===== */
+  #dresscode { background: var(--navy); }
+  #dresscode .section-title { color: var(--cream); }
+  #dresscode .section-eyebrow { color: var(--gold-light); }
+  #dresscode .section-line { background: var(--gold-light); }
+
+  .dress-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+    color: var(--cream);
+  }
+
+  .palette-swatches {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .swatch-color {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+
+  .swatch-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: var(--cream-dark);
+    text-align: center;
+  }
+
+  /* ===== CONTATTI ===== */
+  #contatti { background: var(--cream); }
+
+  .contact-form {
+    max-width: 550px;
+    margin: 0 auto;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(27,58,92,0.25);
+    background: var(--white);
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    color: var(--navy);
+    outline: none;
+    transition: border-color 0.3s;
+    appearance: none;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--gold);
+  }
+
+  .form-group textarea { min-height: 120px; resize: vertical; }
+
+  .form-submit {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background: var(--navy);
+    color: var(--cream);
+    border: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .form-submit:hover { background: var(--forest); }
+
+  .form-success {
+    display: none;
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.3rem;
+    color: var(--forest);
+    padding: 2rem;
+  }
+
+  /* ===== HUNT TEASER ===== */
+  #hunt-teaser {
+    background: var(--forest);
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .hunt-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--cream);
+    margin-bottom: 1.5rem;
+  }
+
+  .hunt-btn {
+    display: inline-block;
+    border: 1.5px solid var(--gold);
+    color: var(--gold-light);
+    padding: 0.8rem 2.5rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .hunt-btn:hover { background: var(--gold); color: var(--navy); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: #111820;
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--cream-dark);
+  }
+
+  .footer-names {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.8rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-date {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    opacity: 0.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-heart { color: var(--gold); font-size: 1.2rem; }
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ===== RESPONSIVE — MOBILE FIRST ===== */
+
+  /* Tablet e smartphone grandi (≤ 768px) */
+  @media (max-width: 768px) {
+    /* Nav */
+    .nav-links { display: none; }
+    nav { padding: 0.8rem 1rem; }
+
+    /* SPLASH mobile: niente margin-left, foto centrata, sfondo che copre */
+    .splash-photo { background: #7A9BAD; }
+    .splash-photo img { width: 100%; margin-left: 0; object-position: center 28%; }
+
+    /* Hero su mobile: 100vh, slide 2 barca non va troppo su */
+    #hero { height: 100vh; }
+    .hero-slide { background-position: center center !important; }
+    /* Eccezioni: mantieni posizioni buone anche su mobile */
+    .hero-slide:first-child { background-position: center 45% !important; }
+    .hero-slide:nth-child(4) { background-position: center 65% !important; }
+    .hero-slide:nth-child(5) { background-position: center 35% !important; }
+    #countdown { gap: 0.8rem; }
+    .countdown-num { font-size: clamp(1.8rem, 8vw, 3rem); }
+    .countdown-sep { font-size: 2rem; padding-bottom: 0.8rem; }
+    .countdown-label { font-size: 0.5rem; }
+
+    /* Sezioni: padding ridotto */
+    section { padding: 4rem 1.2rem; }
+
+    /* Timeline mobile: tutto a sinistra */
+    .timeline::before { left: 20px; }
+    .tl-item { flex-direction: column !important; padding-left: 2.5rem; position: relative; }
+    .tl-dot { position: absolute; left: 14px; margin-top: 1.5rem; }
+    .tl-spacer { display: none; }
+    .tl-content {
+      border-left: 3px solid var(--gold) !important;
+      border-right: none !important;
+    }
+
+    /* Photo grid storia — colonna singola su mobile */
+    .photo-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+    .photo-grid img { aspect-ratio: 4/3; }
+
+    /* Gallery */
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+
+    /* Location */
+    .location-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+
+    /* Quote band: no fixed attachment (bug iOS Safari) */
+    .quote-band-bg { background-attachment: scroll !important; }
+
+    /* Programma tabs */
+    .prog-tab { padding: 0.6rem 1rem; font-size: 0.65rem; }
+
+    /* Dress code swatches */
+    .swatch-color { width: 48px; height: 48px; }
+  }
+
+  /* Smartphone (≤ 480px — iPhone 16, SE, ecc.) */
+  @media (max-width: 480px) {
+    /* SPLASH: foto ancora più centrata su schermi stretti */
+    .splash-photo img {
+      width: 100%;
+      margin-left: 0;
+      object-position: 40% 28%;
+    }
+
+    /* Hero countdown compatto */
+    #countdown { gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+    .countdown-item { min-width: 60px; }
+    .countdown-num { font-size: 2rem; }
+    .countdown-sep { display: none; }
+
+    /* Section title più piccolo */
+    .section-title { font-size: clamp(1.6rem, 8vw, 2.4rem); }
+
+    /* Quote band testo */
+    .quote-text { font-size: clamp(1.2rem, 5vw, 1.8rem); }
+
+    /* Form a tutta larghezza */
+    .contact-form { padding: 0 0.2rem; }
+
+    /* Gallery 2 colonne, gap minimo */
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 0.25rem; }
+
+    /* Palette swatches: wrap ordinato */
+    .palette-swatches { gap: 0.6rem; }
+    .swatch-color { width: 44px; height: 44px; }
+
+    /* Hunt btn full width */
+    .hunt-btn { display: block; margin: 0 auto; max-width: 240px; }
+  }
+
+  /* EN/IT toggle */
+  [data-it] { display: block; }
+  [data-en] { display: none; }
+  body.en [data-it] { display: none; }
+  body.en [data-en] { display: block; }
+  /* Span inline variants */
+  span[data-it] { display: inline; }
+  span[data-en] { display: none; }
+  body.en span[data-it] { display: none; }
+  body.en span[data-en] { display: inline; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH — foto unica condivisa, Simone a sinistra / Bridget a destra -->
+<div id="splash">
+
+  <!-- Foto unica di sfondo — condivisa da entrambe le metà -->
+  <div class="splash-photo">
+    <img src="https://i.ibb.co/YF92dvgB/PXL-20260518-235516988-2.jpg"
+         alt="Simone & Bridget" fetchpriority="high">
+  </div>
+
+  <!-- Metà sinistra — Simone (IT) -->
+  <div class="splash-half splash-left" onclick="chooseLang('it')">
+    <div class="splash-overlay"></div>
+    <div class="splash-content">
+      <div class="splash-flag">🇮🇹</div>
+      <div class="splash-name">Simone</div>
+      <div class="splash-sub">Entra in italiano</div>
+      <div class="splash-btn">Benvenuto</div>
+    </div>
+  </div>
+
+  <!-- Linea divisoria verticale + cuore centrale -->
+  <div class="splash-divider"></div>
+  <div class="splash-heart">♥</div>
+
+  <!-- Metà destra — Bridget (EN) -->
+  <div class="splash-half splash-right" onclick="chooseLang('en')">
+    <div class="splash-overlay"></div>
+    <div class="splash-content">
+      <div class="splash-flag">🌍</div>
+      <div class="splash-name">Bridget</div>
+      <div class="splash-sub">Enter in English</div>
+      <div class="splash-btn">Welcome</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="nav-logo" href="#">S & B</a>
+  <ul class="nav-links">
+    <li><a href="#storia" data-it>La Storia</a><a href="#storia" data-en>Our Story</a></li>
+    <li><a href="#gallery" data-it>Galleria</a><a href="#gallery" data-en>Gallery</a></li>
+    <li><a href="#programma" data-it>Programma</a><a href="#programma" data-en>Schedule</a></li>
+    <li><a href="#location">Location</a></li>
+    <li><a href="#contatti" data-it>Contatti</a><a href="#contatti" data-en>Contact</a></li>
+  </ul>
+  <div class="nav-lang"></div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-slides">
+    <!-- Slide 1: cuore con le mani — versione che funzionava -->
+    <div class="hero-slide active" style="background-image:url('https://i.ibb.co/YF92dvgB/PXL-20260518-235516988-2.jpg'); background-position: center 45%; background-size: cover;"></div>
+    <!-- Slide 2: selfie barca mare/vento — su ancora, vedere mento Simone -->
+    <div class="hero-slide" style="background-image:url('https://i.ibb.co/spg6HhJq/PXL-20250801-182903070.jpg'); background-position: center calc(50% - 350px); background-size: cover;"></div>
+    <!-- Slide 3: proposta rimossa su richiesta -->
+    <!-- Slide 4: bacio proposta -->
+    <div class="hero-slide" style="background-image:url('https://i.ibb.co/ZRgCzRpd/IMG-20251109-WA0007-1.jpg'); background-position: center 65%; background-size: cover;"></div>
+    <!-- Slide 4: tramonto coppia -->
+    <div class="hero-slide" style="background-image:url('https://i.ibb.co/YTXmkwXT/PXL-20250801-210721382.jpg'); background-position: center 35%; background-size: cover;"></div>
+    <!-- Slide 5: nuove foto romantiche -->
+    <div class="hero-slide" style="background-image:url('https://i.ibb.co/qF2Gq35j/Whats-App-Image-2026-05-18-at-21-58-43.jpg'); background-position: center center; background-size: cover;"></div>
+    <div class="hero-slide" style="background-image:url('https://i.ibb.co/GvJ5JM8D/Whats-App-Image-2026-05-18-at-22-22-51.jpg'); background-position: center center; background-size: cover;"></div>
+    <div class="hero-slide" style="background-image:url('https://i.ibb.co/BVtLQ3H4/Whats-App-Image-2026-05-18-at-22-23-45.jpg'); background-position: center center; background-size: cover;"></div>
+    <div class="hero-slide" style="background-image:url('https://i.ibb.co/Cs15nzY5/Whats-App-Image-2026-05-18-at-22-45-52.jpg'); background-position: center center; background-size: cover;"></div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span data-it>1 AGOSTO 2026 · L'ALBERETA · FRANCIACORTA</span>
+      <span data-en style="display:none">AUGUST 1, 2026 · L'ALBERETA · FRANCIACORTA</span>
+    </div>
+    <div class="hero-title">
+      Simone<br><em>&amp;</em><br>Bridget
+    </div>
+    <div class="hero-date">
+      <span data-it>Ci sposiamo</span>
+      <span data-en>We're getting married</span>
+    </div>
+    <div id="countdown">
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-days">—</div>
+        <div class="countdown-label" data-it>GIORNI</div>
+        <div class="countdown-label" data-en>DAYS</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-hours">—</div>
+        <div class="countdown-label" data-it>ORE</div>
+        <div class="countdown-label" data-en>HOURS</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-min">—</div>
+        <div class="countdown-label" data-it>MINUTI</div>
+        <div class="countdown-label" data-en>MINUTES</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-sec">—</div>
+        <div class="countdown-label" data-it>SECONDI</div>
+        <div class="countdown-label" data-en>SECONDS</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STORIA -->
+<section id="storia">
+  <div class="section-eyebrow" data-it>LA NOSTRA STORIA</div>
+  <div class="section-eyebrow" data-en>OUR STORY</div>
+  <h2 class="section-title reveal" data-it>Come tutto è <em>cominciato</em></h2>
+  <h2 class="section-title reveal" data-en>How it all <em>began</em></h2>
+  <div class="section-line"></div>
+
+  <!-- Heart photo -->
+  <div style="text-align:center; margin-bottom:3rem;">
+    <svg width="300" height="270" viewBox="0 0 300 270" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
+      <defs>
+        <clipPath id="heartClip">
+          <path d="M150,240 C150,240 20,160 20,80 C20,40 50,20 80,20 C110,20 130,40 150,60 C170,40 190,20 220,20 C250,20 280,40 280,80 C280,160 150,240 150,240 Z"/>
+        </clipPath>
+      </defs>
+      <image href="https://i.ibb.co/YF92dvgB/PXL-20260518-235516988-2.jpg"
+             x="0" y="0" width="300" height="270"
+             clip-path="url(#heartClip)"
+             preserveAspectRatio="xMidYMid slice"/>
+    </svg>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item reveal">
+      <div class="tl-content">
+        <div class="tl-date" data-it>8 NOVEMBRE 2023</div>
+        <div class="tl-date" data-en>NOVEMBER 8, 2023</div>
+        <div class="tl-text" data-it>Era il suo compleanno. Bridget si avvicina al bar dove lavora Simone. Lui non capisce una parola di inglese — ma capisce tutto il resto. ♥</div>
+        <div class="tl-text" data-en>Her birthday. Bridget walks up to the bar where Simone works. He doesn't understand a word of English — but understands everything else. ♥</div>
+      </div>
+      <div class="tl-dot"></div>
+      <div class="tl-spacer"></div>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-spacer"></div>
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-date" data-it>INVERNO 2023–24</div>
+        <div class="tl-date" data-en>WINTER 2023–24</div>
+        <div class="tl-text" data-it>Si ritrovano. Primo appuntamento sul rooftop del PomPom Cayman, tra luci e tramonto caraibico.</div>
+        <div class="tl-text" data-en>They find each other again. First date at the PomPom rooftop in Cayman, under Caribbean lights and a golden sunset.</div>
+      </div>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-content">
+        <div class="tl-date" data-it>PRIMAVERA 2024</div>
+        <div class="tl-date" data-en>SPRING 2024</div>
+        <div class="tl-text" data-it>Incontra la famiglia — mamma, papà e Sierra. Due mondi si fondono in uno.</div>
+        <div class="tl-text" data-en>He meets the family — mum, dad and Sierra. Two worlds becoming one.</div>
+      </div>
+      <div class="tl-dot"></div>
+      <div class="tl-spacer"></div>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-spacer"></div>
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-date" data-it>8 NOVEMBRE 2025</div>
+        <div class="tl-date" data-en>NOVEMBER 8, 2025</div>
+        <div class="tl-text" data-it>Due anni esatti dopo. Stesso ristorante, ma questa volta Simone si inginocchia. Lei dice sì. 💍</div>
+        <div class="tl-text" data-en>Exactly two years later. Same restaurant, but this time Simone gets down on one knee. She says yes. 💍</div>
+      </div>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-content">
+        <div class="tl-date" data-it>1 AGOSTO 2026</div>
+        <div class="tl-date" data-en>AUGUST 1, 2026</div>
+        <div class="tl-text" data-it>L'Albereta, Franciacorta. Il giorno più bello. Vi aspettiamo. 🥂</div>
+        <div class="tl-text" data-en>L'Albereta, Franciacorta. The most beautiful day. We'll be waiting for you. 🥂</div>
+      </div>
+      <div class="tl-dot"></div>
+      <div class="tl-spacer"></div>
+    </div>
+  </div>
+
+  <!-- Photo grid storia — solo proposta -->
+  <div class="photo-grid reveal" style="margin-top:4rem;" id="storia-grid">
+    <img src="https://i.ibb.co/1Yc5c9Fv/IMG-20251109-WA0004.jpg" alt="Proposta" style="object-position: center calc(70% + 160px);">
+    <img src="https://i.ibb.co/ZRgCzRpd/IMG-20251109-WA0007-1.jpg" alt="Bacio proposta">
+    <img src="https://i.ibb.co/bRGfPf73/IMG-20251109-WA0003.jpg" alt="Famiglia proposta">
+    <img src="https://i.ibb.co/HftHG2wK/IMG-20251109-WA0009.jpg" alt="Abbraccio proposta">
+  </div>
+
+  <!-- SEZIONE DESTINO — foto bambini affiancati -->
+  <div class="destiny-wrap reveal">
+    <div class="destiny-label" data-it>Qualcuno stava già pianificando tutto...</div>
+    <div class="destiny-label" data-en>Someone was already planning all of this...</div>
+    <div class="destiny-photo-wrap">
+      <img src="https://i.ibb.co/nqx2BRx6/Chat-GPT-Image-May-18-2026-08-57-14-PM.png" alt="Simone e Bridget bambini">
+      <div class="destiny-names">
+        <span data-it>Simone — Italia &nbsp;✦&nbsp; Bridget — Inghilterra</span>
+        <span data-en>Simone — Italy &nbsp;✦&nbsp; Bridget — England</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- QUOTE 1 -->
+<div class="quote-band">
+  <div class="quote-band-bg" style="background-image:url('https://i.ibb.co/spg6HhJq/PXL-20250801-182903070.jpg')"></div>
+  <div class="quote-text" data-it>"Non ho capito le parole, ma ho capito subito che eri tu."</div>
+  <div class="quote-text" data-en>"I didn't understand the words, but I knew right away it was you."</div>
+  <div class="quote-author">— Simone</div>
+</div>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="section-eyebrow" data-it>I NOSTRI MOMENTI</div>
+  <div class="section-eyebrow" data-en>OUR MOMENTS</div>
+  <h2 class="section-title reveal" data-it>Una vita <em>insieme</em></h2>
+  <h2 class="section-title reveal" data-en>A life <em>together</em></h2>
+  <div class="section-line"></div>
+
+  <div class="gallery-grid" id="gallery-grid">
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/spg6HhJq/PXL-20250801-182903070.jpg" alt="Barca selfie"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/DfGM4hNG/PXL-20250801-192656044.jpg" alt="Barca insieme"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/zVSK6L4Y/PXL-20250801-192903560.jpg" alt="Maialini spiaggia"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/YTXmkwXT/PXL-20250801-210721382.jpg" alt="Tramonto coppia"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/fzbhYCxV/IMG-20251003-WA0009.jpg" alt="Costume banana"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/vvC4gGz1/IMG-20260221-WA0020.jpg" alt="Maionese XXL"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/kVDfXz1z/IMG-20251214-WA0020.jpg" alt="Natale famiglia"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/bgMswTmH/PXL-20260101-050000588.jpg" alt="Capodanno fuochi"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/Ng23rXPh/IMG-20260213-WA0015.jpg" alt="Together divertente"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/k6wZwNmG/PXL-20260315-191953960.jpg" alt="Together marzo"></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/qF2Gq35j/Whats-App-Image-2026-05-18-at-21-58-43.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/4gS7DWGh/Whats-App-Image-2026-05-18-at-22-00-26.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/B2vb04X4/Whats-App-Image-2026-05-18-at-22-01-15.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/p5pdNvD/Whats-App-Image-2026-05-18-at-22-02-56.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/7NJRhC9C/Whats-App-Image-2026-05-18-at-22-03-44.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/mFPJ4Hvg/Whats-App-Image-2026-05-18-at-22-06-59.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/2YhkxF5F/Whats-App-Image-2026-05-18-at-22-09-59.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/PsNhmY0F/Whats-App-Image-2026-05-18-at-22-12-07.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/3mhzJFvb/Whats-App-Image-2026-05-18-at-22-16-49.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/ch7QpBjK/Whats-App-Image-2026-05-18-at-22-17-59.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/Kj2XbNMw/Whats-App-Image-2026-05-18-at-22-19-16.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/KcGpchcG/Whats-App-Image-2026-05-18-at-22-19-58.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/TxYpZpRH/Whats-App-Image-2026-05-18-at-22-20-17.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/GvJ5JM8D/Whats-App-Image-2026-05-18-at-22-22-51.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/b5QBGnrk/Whats-App-Image-2026-05-18-at-22-23-11.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/BVtLQ3H4/Whats-App-Image-2026-05-18-at-22-23-45.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/qLN0Hpw8/Whats-App-Image-2026-05-18-at-22-26-23.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/HfgxXzMC/Whats-App-Image-2026-05-18-at-22-26-06.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/C30KyWJ8/Whats-App-Image-2026-05-18-at-22-26-41.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/Ng0ptkh0/Whats-App-Image-2026-05-18-at-22-27-23.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/C3ZPYq83/Whats-App-Image-2026-05-18-at-22-27-54.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/JFdMN9kv/Whats-App-Image-2026-05-18-at-22-32-50.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/spYv4VS5/Whats-App-Image-2026-05-18-at-22-36-16.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/6cxkYDHx/Whats-App-Image-2026-05-18-at-22-37-13.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/chVLjqzR/Whats-App-Image-2026-05-18-at-22-38-29.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/prhBD4t8/Whats-App-Image-2026-05-18-at-22-41-27.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/F4KcdR4j/Whats-App-Image-2026-05-18-at-22-42-04.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/jPgq4q7T/Whats-App-Image-2026-05-18-at-22-43-01.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/nNWvSybm/Whats-App-Image-2026-05-18-at-22-43-38.jpg" alt=""></div>
+    <div class="gallery-item reveal"><img src="https://i.ibb.co/Cs15nzY5/Whats-App-Image-2026-05-18-at-22-45-52.jpg" alt=""></div>
+  </div>
+</section>
+
+<!-- QUOTE 2 -->
+<div class="quote-band">
+  <div class="quote-band-bg" style="background-image:url('https://i.ibb.co/SD87LYVn/PXL-20250731-172544034.jpg')"></div>
+  <div class="quote-text" data-it>"In mezzo alla Franciacorta, davanti a tutti quelli che amiamo. Sì."</div>
+  <div class="quote-text" data-en>"In the heart of Franciacorta, in front of everyone we love. Yes."</div>
+  <div class="quote-author">— Bridget</div>
+</div>
+
+<!-- PROGRAMMA -->
+<section id="programma">
+  <div class="section-eyebrow" data-it>IL GRANDE GIORNO</div>
+  <div class="section-eyebrow" data-en>THE BIG DAY</div>
+  <h2 class="section-title reveal" data-it>Il <em>Programma</em></h2>
+  <h2 class="section-title reveal" data-en>The <em>Schedule</em></h2>
+  <div class="section-line"></div>
+
+  <!-- IT: solo sabato -->
+  <div data-it>
+    <div class="prog-day active">
+      <div class="prog-day-title">SABATO 1 AGOSTO 2026</div>
+      <div class="prog-event reveal">
+        <div class="prog-time">16:00</div>
+        <div class="prog-desc">
+          <h4>ARRIVO OSPITI & BENVENUTO</h4>
+          <p>Accoglienza nei giardini dell'Albereta con bollicine di Franciacorta</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">17:00</div>
+        <div class="prog-desc">
+          <h4>CI AVVIAMO VERSO LA CERIMONIA</h4>
+          <p>Tutti insieme verso il luogo della cerimonia</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">17:15</div>
+        <div class="prog-desc">
+          <h4>CERIMONIA</h4>
+          <p>L'Albereta Relais & Châteaux, Erbusco — fino alle 17:45</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">17:45</div>
+        <div class="prog-desc">
+          <h4>APERITIVO POST CERIMONIA</h4>
+          <p>Brindisi e festeggiamenti nei giardini — fino alle 18:30</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">18:45</div>
+        <div class="prog-desc">
+          <h4>CENA DI GALA</h4>
+          <p>Banchetto con musica e celebrazioni — fino alle 20:45</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">21:00</div>
+        <div class="prog-desc">
+          <h4>INIZIA IL PARTY! 🎉</h4>
+          <p>Si balla, si ride, si festeggia</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">21:45</div>
+        <div class="prog-desc">
+          <h4>TAGLIO DELLA TORTA & SORPRESE 🎂</h4>
+          <p>Musica, torta e... sorprese!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EN: venerdì + sabato + domenica -->
+  <div data-en>
+    <div class="programma-tabs">
+      <button class="prog-tab active" onclick="showDay('fri')">FRI 31</button>
+      <button class="prog-tab" onclick="showDay('sat')">SAT 1</button>
+      <button class="prog-tab" onclick="showDay('sun')">SUN 2</button>
+    </div>
+
+    <div class="prog-day active" id="prog-fri">
+      <div class="prog-day-title">FRIDAY 31 JULY 2026</div>
+      <div class="prog-event reveal">
+        <div class="prog-time">🔧</div>
+        <div class="prog-desc">
+          <h4>DETAILS COMING SOON</h4>
+          <p>We're still working on the details for Friday — check back soon!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="prog-day" id="prog-sat">
+      <div class="prog-day-title">SATURDAY 1 AUGUST 2026 — THE WEDDING</div>
+      <div class="prog-event reveal">
+        <div class="prog-time">16:00</div>
+        <div class="prog-desc">
+          <h4>ARRIVAL & WELCOME</h4>
+          <p>Welcome drinks in the gardens of L'Albereta with Franciacorta bubbles</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">17:00</div>
+        <div class="prog-desc">
+          <h4>MAKING OUR WAY TO THE CEREMONY</h4>
+          <p>Everyone together towards the ceremony location</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">17:15</div>
+        <div class="prog-desc">
+          <h4>CEREMONY</h4>
+          <p>L'Albereta Relais & Châteaux, Erbusco — until 17:45</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">17:45</div>
+        <div class="prog-desc">
+          <h4>POST-CEREMONY APERITIVO</h4>
+          <p>Champagne toast and celebrations in the gardens — until 18:30</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">18:45</div>
+        <div class="prog-desc">
+          <h4>GALA DINNER</h4>
+          <p>Banquet with music and celebrations — until 20:45</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">21:00</div>
+        <div class="prog-desc">
+          <h4>PARTY TIME! 🎉</h4>
+          <p>Dancing, laughing, celebrating</p>
+        </div>
+      </div>
+      <div class="prog-event reveal">
+        <div class="prog-time">21:45</div>
+        <div class="prog-desc">
+          <h4>CAKE & SURPRISES 🎂</h4>
+          <p>Music, cake and... surprises!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="prog-day" id="prog-sun">
+      <div class="prog-day-title">SUNDAY 2 AUGUST 2026</div>
+      <div class="prog-event reveal">
+        <div class="prog-time">🔧</div>
+        <div class="prog-desc">
+          <h4>DETAILS COMING SOON</h4>
+          <p>We're still working on the details for Sunday — check back soon!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOCATION -->
+<section id="location">
+  <div class="section-eyebrow">LOCATION</div>
+  <h2 class="section-title reveal">L'<em>Albereta</em></h2>
+  <div class="section-line"></div>
+
+  <div class="location-grid">
+    <div class="reveal">
+      <img class="location-img" src="https://i.ibb.co/tTVNrTVZ/IMG-20251018-WA0009.jpg" alt="Franciacorta">
+    </div>
+    <div class="location-info reveal">
+      <h3>L'ALBERETA RELAIS & CHÂTEAUX</h3>
+      <p data-it>Via Vittorio Emanuele, 23<br>25030 Erbusco (BS)<br>Franciacorta, Lombardia — Italia</p>
+      <p data-en>Via Vittorio Emanuele, 23<br>25030 Erbusco (BS)<br>Franciacorta, Lombardy — Italy</p>
+      <p data-it>Immersa tra le colline e i vigneti della Franciacorta, a pochi chilometri dal Lago d'Iseo. Una location da sogno tra Relais & Châteaux.</p>
+      <p data-en>Nestled among the hills and vineyards of Franciacorta, just a few kilometres from Lake Iseo. A dream venue in the heart of Relais & Châteaux country.</p>
+      <a class="location-btn" href="https://www.albereta.it" target="_blank" rel="noopener">
+        <span data-it>Scopri la location</span>
+        <span data-en>Discover the venue</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- DRESS CODE -->
+<section id="dresscode">
+  <div class="section-eyebrow" data-it>COME VESTIRSI</div>
+  <div class="section-eyebrow" data-en>WHAT TO WEAR</div>
+  <h2 class="section-title reveal" data-it><em>Dress Code</em></h2>
+  <h2 class="section-title reveal" data-en><em>Dress Code</em></h2>
+  <div class="section-line"></div>
+
+  <p class="dress-text reveal" data-it>
+    Cerimonia elegante in stile garden party. Vi chiediamo di seguire la nostra palette cromatica: navy, verde foresta, oro, avorio e crema. Evitate il bianco puro — l'avorio e il perla vanno benissimo. Bordeaux, viola e rosso acceso non rientrano nella palette.
+  </p>
+  <p class="dress-text reveal" data-en>
+    Elegant garden party attire. Please follow our colour palette: navy, forest green, gold, ivory and cream. Avoid pure white — ivory and pearl are perfectly fine. Bordeaux, purple and bright red are outside the palette.
+  </p>
+
+  <div class="palette-swatches reveal">
+    <div class="swatch">
+      <div class="swatch-color" style="background:#1B3A5C;"></div>
+      <div class="swatch-name">NAVY</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#2D4A35;"></div>
+      <div class="swatch-name">FOREST</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#C5A028;"></div>
+      <div class="swatch-name">GOLD</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#E8C84A;"></div>
+      <div class="swatch-name">GOLD LIGHT</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#F5F0E8; border:1px solid rgba(255,255,255,0.15);"></div>
+      <div class="swatch-name">CREAM</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATTI -->
+<section id="contatti">
+  <div class="section-eyebrow" data-it>DOMANDE & CONTATTI</div>
+  <div class="section-eyebrow" data-en>QUESTIONS & CONTACT</div>
+  <h2 class="section-title reveal" data-it>Hai delle <em>domande</em>?</h2>
+  <h2 class="section-title reveal" data-en>Any <em>questions</em>?</h2>
+  <div class="section-line"></div>
+
+  <div class="contact-form reveal">
+    <form id="rsvp-form" action="https://api.web3forms.com/submit" method="POST">
+      <input type="hidden" name="access_key" value="8caad263-8900-4fba-877d-b0de98901cb4">
+      <input type="hidden" name="subject" value="Messaggio — Simone & Bridget">
+      <input type="hidden" name="from_name" value="Wedding Site">
+
+      <div class="form-group">
+        <label data-it>NOME</label>
+        <label data-en>NAME</label>
+        <input type="text" name="name" required>
+      </div>
+
+      <div class="form-group">
+        <label>EMAIL</label>
+        <input type="email" name="email" required>
+      </div>
+
+      <div class="form-group">
+        <label data-it>MESSAGGIO</label>
+        <label data-en>MESSAGE</label>
+        <textarea name="message" placeholder="Allergie, domande, auguri..."></textarea>
+      </div>
+
+      <button type="submit" class="form-submit">
+        <span data-it>INVIA</span>
+        <span data-en>SEND</span>
+      </button>
+    </form>
+    <div class="form-success" id="form-success">
+      <span data-it>Grazie! Non vediamo l'ora di festeggiare con voi. 💛</span>
+      <span data-en>Thank you! We can't wait to celebrate with you. 💛</span>
+    </div>
+  </div>
+</section>
+
+<!-- HUNT TEASER — nascosto di default, visibile solo con ?hunt=on nell'URL -->
+<div id="hunt-teaser" style="display:none;">
+  <div class="hunt-text" data-it>🍋 C'è un tesoro nascosto in questo sito...</div>
+  <div class="hunt-text" data-en>🍋 There's a hidden treasure somewhere on this site...</div>
+  <a href="hunt.html" class="hunt-btn" data-it>TROVA IL TESORO</a>
+  <a href="hunt.html" class="hunt-btn" data-en>FIND THE TREASURE</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-names">Simone & Bridget</div>
+  <div class="footer-date">1 · VIII · 2026 · FRANCIACORTA</div>
+  <div class="footer-heart">♥</div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <button class="lb-nav lb-prev" onclick="lbNav(-1)">‹</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-nav lb-next" onclick="lbNav(1)">›</button>
+</div>
+
+<script>
+// ===== LANG =====
+let currentLang = 'it';
+
+function chooseLang(lang) {
+  const splash = document.getElementById('splash');
+  splash.classList.add('fade-out');
+  setTimeout(() => splash.style.display = 'none', 800);
+  setLang(lang);
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.body.classList.toggle('en', lang === 'en');
+  document.querySelectorAll('.lang-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && lang === 'it') || (i === 1 && lang === 'en'));
+  });
+}
+
+// ===== NAV =====
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// ===== COUNTDOWN =====
+function updateCountdown() {
+  const target = new Date('2026-08-01T16:00:00+02:00');
+  const now = new Date();
+  const diff = target - now;
+  if (diff <= 0) {
+    document.getElementById('countdown').innerHTML = '<div style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:1.5rem;color:var(--gold-light)">♥ Oggi è il giorno ♥</div>';
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-days').textContent = String(d).padStart(3,'0');
+  document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-min').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-sec').textContent = String(s).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// ===== HERO SLIDESHOW =====
+let slideIdx = 0;
+const slides = document.querySelectorAll('.hero-slide');
+setInterval(() => {
+  slides[slideIdx].classList.remove('active');
+  slideIdx = (slideIdx + 1) % slides.length;
+  slides[slideIdx].classList.add('active');
+}, 5000);
+
+// ===== SCROLL REVEAL =====
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// ===== GALLERY LIGHTBOX =====
+const galleryImgs = Array.from(document.querySelectorAll('.gallery-item img')).map(i => i.src);
+let lbIndex = 0;
+
+document.querySelectorAll('.gallery-item').forEach((item, i) => {
+  item.addEventListener('click', () => openLightbox(i));
+});
+
+function openLightbox(i) {
+  lbIndex = i;
+  document.getElementById('lb-img').src = galleryImgs[i];
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function lbNav(dir) {
+  lbIndex = (lbIndex + dir + galleryImgs.length) % galleryImgs.length;
+  document.getElementById('lb-img').src = galleryImgs[lbIndex];
+}
+
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') lbNav(-1);
+  if (e.key === 'ArrowRight') lbNav(1);
+});
+
+// ===== PROGRAM TABS (EN) =====
+function showDay(day) {
+  document.querySelectorAll('.prog-day[id]').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.prog-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('prog-' + day).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ===== RSVP FORM =====
+document.getElementById('rsvp-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const data = new FormData(this);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+    if (res.ok) {
+      this.style.display = 'none';
+      document.getElementById('form-success').style.display = 'block';
+    }
+  } catch(err) {
+    alert('Errore invio — riprova più tardi.');
+  }
+});
+
+// ===== HUNT TEASER — visibile solo con ?hunt=on =====
+if (new URLSearchParams(window.location.search).get('hunt') === 'on') {
+  document.getElementById('hunt-teaser').style.display = 'block';
+}
+
+// ===== EASTER EGG: maionese =====
+let typed = '';
+document.addEventListener('keypress', e => {
+  typed += e.key.toLowerCase();
+  if (typed.includes('maionese')) window.location.href = 'hunt.html';
+  if (typed.length > 20) typed = typed.slice(-20);
+});
+</script>
+</body>
+</html>
